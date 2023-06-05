@@ -1,0 +1,117 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <title>User page</title>
+</head>
+<body>
+    {% if email == True %}
+        <script>
+            alert("{{email_status}} email to {{sent_to}}");
+        </script>
+    {% endif %}
+    <div class="top-bar">
+        <a href="/"><button>Home</button></a>
+        <a href="/logout/"><button>Logout</button></a>
+    </div>
+    <div id="options_bar">
+        <form action="" method="get">
+          {% csrf_token %}
+          <label for="sort_by">Sort by:</label>
+          <select name="sort_by" id="sort_by" class="select-input">
+            <option value="due_date" {% if sort_by == 'due_date' %}selected{% endif %}>Due date</option>
+            <option value="priority" {% if sort_by == 'priority' %}selected{% endif %}>Priority</option>
+          </select>
+          <label for="order_by">Order by:</label>
+          <select name="order_by" id="order_by" class="select-input">
+            <option value="ascending" {% if order_by == 'ascending' %}selected{% endif %}>Ascending</option>
+            <option value="descending" {% if order_by == 'descending' %}selected{% endif %}>Descending</option>
+          </select>
+          <input type="submit" value="Sort" class="submit_sort">
+        </form>
+        <a href="/user/{{username}}/?status={{completed}}">
+          <button class="show-button">Show {{completed}}</button>
+        </a>
+        <button id="toggleFormButton">Add task</button>
+      </div>
+      
+    <div id="add_task_div">
+        <!-- <h3 class="add_task_heading">Add a task</h3> -->
+        <form action="" method="post" class="add_task_form" id="taskForm">
+            {% csrf_token %}
+            <div class="form-row">
+                <label class="add_task_labels" for="task">Task name: </label>
+                <input class="add_task_inputs" type="text" name="task" id="task" placeholder="Task name">    
+            </div>
+            <div class="form-row">
+                <label class="add_task_labels" for="assigned_to">Assign to:</label>
+                <input class="add_task_inputs" type="text" name="assigned_to" id="assigned_to" placeholder="Resource name">    
+            </div>
+            <div class="form-row">
+                <label class="add_task_labels" for="desc">Description: </label>
+                <input class="add_task_inputs" type="text" name="desc" id="desc" placeholder="Description">    
+            </div>
+            <div class="form-row">
+                <label class="add_task_labels" for="rmail">Employee email: </label>
+                <input class="add_task_inputs" type="email" name="rmail" id="rmail" placeholder="Employee email">    
+            </div>
+            <div class="form-row">
+                <label class="add_task_labels" for="priority">Priority: </label>
+            <select class="add_task_inputs" name="priority" id="priority">
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+            </select>
+            </div>
+            <div class="form-row">
+                <label class="add_task_labels" for="due_date">Due date: </label>
+                <input class="add_task_inputs" type="datetime-local" name="due_date" id="due_date">
+            </div>
+            
+            <input type="submit" value="Add" class="form-row submit-add">
+        </form>
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}        
+    </div>
+    {% for e in tasks %}
+    <div id="task_card_div" class="card {{e.priority}}">
+        <h2 class="task_heading">{{e.task}}</h2>
+        <p><b>Assigned to:</b> {{e.assigned_to}}</p>
+        <p><b>Details:</b> {{e.desc}}</p>
+        <p><b>Deadline:</b> {{e.due_date}}</p>
+        <p><b>Priority:</b> {{e.priority}}</p>
+        <div class="button-holder">
+            <form action="" method="post" class="right-element">
+                {% csrf_token %}
+                <input type="hidden" name="mark_as_done" id="mark_as_done" value="mark_as_done">
+                <input type="hidden" name="card_details" id="card_details" value="{{e.task}}&{{e.assigned_to}}&{{e.desc}}&{{e.due_date}}&{{e.priority}}">
+                <input type="submit" id="Mark as done" value="Mark as done" class="bottom_button">
+            </form> 
+            <form action="" method="post" class="center-element">
+                {% csrf_token %}
+                <input type="hidden" name="delete" id="delete" value="delete">
+                <input type="hidden" name="card_details" id="card_details" value="{{e.task}}&{{e.assigned_to}}&{{e.desc}}&{{e.due_date}}&{{e.priority}}">
+                <input type="submit" id="Delete" value="Delete" class="bottom_button">
+            </form>
+            <form action="" method="get" class="left-element">
+                {% csrf_token %}
+                <input type="hidden" name="mail_details" id="mail_details" value="mail_details">
+                <input type="hidden" name="mail_details" id="mail_details" value="{{e.task}}&{{e.assigned_to}}&{{e.desc}}&{{e.due_date}}&{{e.priority}}&{{e.assigned_mail}}">
+                <input type="submit" id="Send-email-notice" value="Send email notice" class="bottom_button">
+            </form>
+        </div>
+             
+    </div>
+    {% endfor %}
+    <script src="{% static 'util.js' %}"></script>
+</body>
+</html>
